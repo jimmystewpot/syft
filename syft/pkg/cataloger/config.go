@@ -46,5 +46,6 @@ func (c Config) JavaConfig() java.ArchiveCatalogerConfig {
 		UseNetwork:              c.Java.UseNetwork,
 		MavenBaseURL:            c.Java.MavenBaseURL,
 		MaxParentRecursiveDepth: c.Java.MaxParentRecursiveDepth,
+		UseParentPomVersion:     c.Java.UseParentPomVersion,
 	}
 }

@@ -9,12 +9,14 @@ type ArchiveCatalogerConfig struct {
 	UseNetwork                     bool   `yaml:"use-network" json:"use-network" mapstructure:"use-network"`
 	MavenBaseURL                   string `yaml:"maven-base-url" json:"maven-base-url" mapstructure:"maven-base-url"`
 	MaxParentRecursiveDepth        int    `yaml:"max-parent-recursive-depth" json:"max-parent-recursive-depth" mapstructure:"max-parent-recursive-depth"`
+	UseParentPomVersion            bool   `yaml:"use-parent-pom-version" json:"use-parent-pom-version" mapstructure:"use-parent-pom-version"`
 }
 
 func DefaultArchiveCatalogerConfig() ArchiveCatalogerConfig {
 	return ArchiveCatalogerConfig{
 		ArchiveSearchConfig:     cataloging.DefaultArchiveSearchConfig(),
 		UseNetwork:              false,
+		UseParentPomVersion:     true,
 		MavenBaseURL:            mavenBaseURL,
 		MaxParentRecursiveDepth: 5,
 	}
@@ -22,6 +24,11 @@ func DefaultArchiveCatalogerConfig() ArchiveCatalogerConfig {
 
 func (j ArchiveCatalogerConfig) WithUseNetwork(input bool) ArchiveCatalogerConfig {
 	j.UseNetwork = input
+	return j
+}
+
+func (j ArchiveCatalogerConfig) WithParentPomVersion(input bool) ArchiveCatalogerConfig {
+	j.UseParentPomVersion = input
 	return j
 }
 

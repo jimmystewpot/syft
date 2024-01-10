@@ -37,8 +37,10 @@ func recursivelyFindVersionFromParentPom(groupID, artifactID, parentGroupID, par
 			log.Tracef("unable to get parent pom from Maven central: %v", err)
 			break
 		}
+		log.Tracef("parentPom: %+v, parentPom.DependencyManagement: %+v", parentPom, parentPom.DependencyManagement)
 		if parentPom != nil && parentPom.DependencyManagement != nil {
 			for _, dependency := range *parentPom.DependencyManagement.Dependencies {
+				log.Tracef("groupID: %+v, artifactID: %+v, dependency.Version: %+v", *dependency.GroupID, *dependency.ArtifactID, dependency.Version)
 				if groupID == *dependency.GroupID && artifactID == *dependency.ArtifactID && dependency.Version != nil {
 					return *dependency.Version
 				}

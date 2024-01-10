@@ -8,6 +8,7 @@ import (
 	"reflect"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/saintfish/chardet"
 	"github.com/vifraa/gopom"
@@ -130,7 +131,15 @@ func newPackageFromPom(pom gopom.Project, dep gopom.Dependency, cfg ArchiveCatal
 			}
 		}
 	}
+	// use parent pom version if network is not enabled.
+	if cfg.UseParentPomVersion && !cfg.UseNetwork {
+		if version == "" {
+			version = *pom.Parent.Version
+		}
+	}
 
+	log.Tracef("version: %+v, pom.Parent.Version: %+v, pom.Parent.ArtifactID: %+v, dep.Version: %+v, use-parent-pom: %+v", version, *pom.Parent.Version, *pom.Parent.ArtifactID, dep, cfg.UseParentPomVersion)
+	time.Sleep(50 * time.Millisecond)
 	p := pkg.Package{
 		Name:      name,
 		Version:   version,
