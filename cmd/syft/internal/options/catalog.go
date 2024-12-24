@@ -46,6 +46,7 @@ type Catalog struct {
 	JavaScript  javaScriptConfig  `yaml:"javascript" json:"javascript" mapstructure:"javascript"`
 	LinuxKernel linuxKernelConfig `yaml:"linux-kernel" json:"linux-kernel" mapstructure:"linux-kernel"`
 	Python      pythonConfig      `yaml:"python" json:"python" mapstructure:"python"`
+	Rust        rustConfig        `yaml:"rust" json:"rust" mapstructure:"rust"`
 
 	// configuration for the source (the subject being analyzed)
 	Registry   registryConfig `yaml:"registry" json:"registry" mapstructure:"registry"`
