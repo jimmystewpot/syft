@@ -7,6 +7,7 @@ import (
 	"github.com/anchore/syft/syft/pkg/cataloger/javascript"
 	"github.com/anchore/syft/syft/pkg/cataloger/kernel"
 	"github.com/anchore/syft/syft/pkg/cataloger/python"
+	"github.com/anchore/syft/syft/pkg/cataloger/rust"
 )
 
 type Config struct {
@@ -16,6 +17,7 @@ type Config struct {
 	JavaScript  javascript.CatalogerConfig        `yaml:"javascript" json:"javascript" mapstructure:"javascript"`
 	LinuxKernel kernel.LinuxKernelCatalogerConfig `yaml:"linux-kernel" json:"linux-kernel" mapstructure:"linux-kernel"`
 	Python      python.CatalogerConfig            `yaml:"python" json:"python" mapstructure:"python"`
+	Rust        rust.CatalogerConfig              `yaml:"rust" json:"rust" mapstructure:"rust"`
 }
 
 func DefaultConfig() Config {

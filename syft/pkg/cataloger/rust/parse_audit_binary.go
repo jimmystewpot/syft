@@ -7,6 +7,7 @@ import (
 
 	"github.com/microsoft/go-rustaudit"
 
+	"github.com/anchore/syft/internal/licenses"
 	"github.com/anchore/syft/internal/log"
 	"github.com/anchore/syft/internal/relationship"
 	"github.com/anchore/syft/syft/artifact"
@@ -16,8 +17,18 @@ import (
 	"github.com/anchore/syft/syft/pkg/cataloger/generic"
 )
 
+type cargoAuditBinaryCataloger struct {
+	licenseResolver *rustLicenseResolver
+}
+
+func newCargoAuditBinaryCataloger(opts CatalogerConfig) *cargoAuditBinaryCataloger {
+	return &cargoAuditBinaryCataloger{
+		licenseResolver: newRustLicenseResolver(cargoAuditBinaryCatalogerName, opts),
+	}
+}
+
 // Catalog identifies executables then attempts to read Rust dependency information from them
-func parseAuditBinary(_ context.Context, _ file.Resolver, _ *generic.Environment, reader file.LocationReadCloser) ([]pkg.Package, []artifact.Relationship, error) {
+func (c *cargoAuditBinaryCataloger) parseAuditBinary(ctx context.Context, resolver file.Resolver, _ *generic.Environment, reader file.LocationReadCloser) ([]pkg.Package, []artifact.Relationship, error) {
 	var pkgs []pkg.Package
 	var relationships []artifact.Relationship
 
@@ -26,9 +37,18 @@ func parseAuditBinary(_ context.Context, _ file.Resolver, _ *generic.Environment
 		return nil, nil, err
 	}
 
-	infos, err := parseAuditBinaryEntry(unionReader, reader.RealPath)
+	licenseScanner := licenses.ContextLicenseScanner(ctx)
+
+	infos, err := c.parseAuditBinaryEntry(unionReader, reader.RealPath)
 	for _, versionInfo := range infos {
 		auditPkgs, auditRelationships := processAuditVersionInfo(reader.Location, versionInfo)
+		for p := 0; p < len(auditPkgs); p++ {
+			licenses, err := c.licenseResolver.getLicenses(ctx, licenseScanner, resolver, auditPkgs[p].Name, auditPkgs[p].Version)
+			if err != nil {
+				log.Tracef("error getting licenses for package: %s %v", auditPkgs[p].Name, err)
+			}
+			auditPkgs[p].Licenses = pkg.NewLicenseSet(licenses...)
+		}
 		pkgs = append(pkgs, auditPkgs...)
 		relationships = append(relationships, auditRelationships...)
 	}
@@ -37,7 +57,7 @@ func parseAuditBinary(_ context.Context, _ file.Resolver, _ *generic.Environment
 }
 
 // scanFile scans file to try to report the Rust crate dependencies
-func parseAuditBinaryEntry(reader unionreader.UnionReader, filename string) ([]rustaudit.VersionInfo, error) {
+func (c *cargoAuditBinaryCataloger) parseAuditBinaryEntry(reader unionreader.UnionReader, filename string) ([]rustaudit.VersionInfo, error) {
 	// NOTE: multiple readers are returned to cover universal binaries, which are files
 	// with more than one binary
 	readers, err := unionreader.GetReaders(reader)
